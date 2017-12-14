@@ -10,7 +10,8 @@ class Users::InvitationsController < Devise::InvitationsController
   end
 
   def edit
-    redirect_to omniauth_authorize_path(:user, :google_oauth2, :token => resource.invitation_token, :state => "invitation")
+    #redirect_to omniauth_authorize_path(:user, :google_oauth2, :token => resource.invitation_token, :state => "invitation")
+    redirect_to("/auth/google_oauth2?state=invitation&token=#{resource.invitation_token}")
   end
 
   def update

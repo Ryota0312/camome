@@ -19,7 +19,7 @@ Rails.application.routes.draw do
 
   post "users/authorize_application", to: "users#authorize_application"
   devise_for :users, controllers: {
-               omniauth_callbacks: "users/omniauth_callbacks",
+               #omniauth_callbacks: "users/omniauth_callbacks",
                registrations: 'users/registrations',
                confirmations: 'users/confirmations',
                passwords: 'users/passwords',
@@ -33,6 +33,9 @@ Rails.application.routes.draw do
   end
   get "users/:id" , to: "users#show"
 
+  get '/auth/google_oauth2/callback', to: 'users/omniauth_callbacks#google_oauth2'
+  get '/auth/google_oauth2_calendar/callback', to: 'users/omniauth_callbacks#google_oauth2_calendar'
+  
   get "calendars/import"
   post "calendars/import"
   post "calendars/create_caldav"

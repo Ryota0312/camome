@@ -1,4 +1,4 @@
-class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
+class Users::OmniauthCallbacksController < ApplicationController
   skip_before_action :authenticate
   # You should configure your model like this:
   # devise :omniauthable, omniauth_providers: [:twitter]
@@ -27,31 +27,16 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   #   super(scope)
   # end
 
-  def google_oauth2
+  def google_oauth2_calendar
     params = request.env["omniauth.params"]
     token = params["token"]
     state = params["state"]
     auth = request.env["omniauth.auth"]
 
+    logger.debug("--------auth-----#{auth}")
+    logger.debug("--------params-----#{params}\n#{state},#{token}")
+    
     case state
-    when "invitation"
-      user = User.where("invitation_token = token").first
-      if user
-        User.current = user
-        user.provider = auth.provider
-        user.auth_name = auth.info.email
-        user.save
-
-        master_auth_info = MasterAuthInfo.new()
-        user.master_auth_info = master_auth_info
-        master_auth_info.save
-
-        sign_in user
-        redirect_to '/users/edit'
-      else
-        flash[:error] = "Invalid invitation token"
-        redirect_to '/welcome/index'
-      end
     when "application"
       if session[:app_token] == token
         # In the future, we will create CalendarAuthInfo at this timing
@@ -77,6 +62,40 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
         redirect_to '/users/edit/applications'
       else
         flash[:error] = "Invalid token"
+        redirect_to '/welcome/index'
+      end
+    else
+      flash[:error] = "We can't understand the purpose of auth"
+      redirect_to '/welcome/index'
+    end
+  end
+
+  def google_oauth2
+    params = request.env["omniauth.params"]
+    token = params["token"]
+    state = params["state"]
+    auth = request.env["omniauth.auth"]
+
+    logger.debug("--------auth-----#{auth}")
+    logger.debug("--------params-----#{params}\n#{state},#{token}")
+
+    case state
+    when "invitation"
+      user = User.where(invitation_token: token).first
+      if user
+        User.current = user
+        user.provider = auth.provider
+        user.auth_name = auth.info.email
+        user.save
+
+        master_auth_info = MasterAuthInfo.new()
+        user.master_auth_info = master_auth_info
+        master_auth_info.save
+
+        sign_in user
+        redirect_to '/users/edit'
+      else
+        flash[:error] = "Invalid invitation token"
         redirect_to '/welcome/index'
       end
     when "login"

@@ -75,9 +75,11 @@ class UsersController < ApplicationController
       session[:decrypted_pass] = auth_info.decrypted_pass
       ds = DataStore::RedisStore.new
       if ds.load(current_user.auth_name) == nil
-        redirect_to omniauth_authorize_path(:user, :google_oauth2, :token => token, :state => "application")
+        #redirect_to omniauth_authorize_path(:user, :google_oauth2, :token => token, :state => "application")
+        redirect_to("/auth/google_oauth2_calendar?state=application&token=#{token}")
       else
-        redirect_to omniauth_authorize_path(:user, :google_oauth2, :token => token, :state => "update")
+        redirect_to("/auth/google_oauth2_calendar?state=update&token=#{token}")
+        #redirect_to omniauth_authorize_path(:user, :google_oauth2, :token => token, :state => "update")
       end
     rescue
       flash[:error] = "Invalid password or Password has not been set"
